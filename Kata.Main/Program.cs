@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace Kata.Main
 {
@@ -11,49 +12,77 @@ namespace Kata.Main
         static void Main(string[] args)
         {
             Console.WriteLine("Started!");
-            var a = new[] { 2, 0, -3, -1, 4, 11, 14, -9, 18, 5, -23, 13 };  
-            //              0, 2, 2, -1, -2, 2, 13, 27, 18, 36, 41, 18, 31
-            //var a = JsonFileReader.ReadJsonFile<int[]>("TestFiles/ShortestSubArraySumData.json");
-            
+            var a = new[] { 2, 0, -3, -1, 4, 11, -14, 4, -19, 18, 5, -23, 13 };
+
+            var array = new[] { 10, 20, 30 };
+
+            var number = 52864903;
+            bool res = false;
             var stop = new Stopwatch();
             stop.Start();
-            var res = BiggestSumSlice(a);
-            stop.Stop();//2374
-
+            var pow = NumberFormater("6");
+            stop.Stop();
             Console.WriteLine("elapsed ms: " + stop.ElapsedMilliseconds);
-            Console.WriteLine(res);
-        }
+            Console.WriteLine($"Result: {pow}");
+        }        
 
-        private static int BiggestSumSlice(int[] a)
+        private static string NumberFormater(string number)
         {
-            var P = new int[a.Length + 1];
-            for (int i = 1; i < a.Length; i++)
-                P[i] = P[i - 1] + a[i - 1];
-
-            var result = a.Max();
-            var largestIndex = 0;
-            for (int i = 2; i < P.Length; i++)
+            var index3 = (number.Length - 1) / 3;
+            var sb = new StringBuilder();
+            int i;
+            for (i = 0; i < index3; i++)
             {
-                if (P[i] >= P[i - 1])
-                {
-                    result = Math.Max(result, P[i] - P[largestIndex]);
-                    continue;
-                }
-                else
-                {
-                    if (Math.Abs(a[i - 1]) > P[i])
-                    {
-                        while (i < P.Length && P[i] < P[i - 1])
-                            i++;
-                        largestIndex = i - 1;
-                    }                        
-                }
-
-                
+                sb.Append(number.Substring(i * 3, 3) + ",");
             }
-
-            return result;
-
+            sb.Append(number.Substring(i * 3));
+            return sb.ToString();
         }
+
+        private static int AnagramCounter(string value)
+        {
+            var result = 0;
+            var v = value.ToCharArray();
+            for (int i = 0; i < v.Length; i++)
+            {                
+                for (int l = v.Length - 1; l > i; l--)
+                {
+                    var x = i;
+                    var lAux = l;
+                    while(v[x] == v[lAux])
+                    {
+                        x++;
+                        lAux--;
+                        if (x >= lAux)
+                        {
+                            result++;
+                            break;
+                        }
+                    }                    
+                }
+            }
+            return result;
+        }
+
+        private static int SubStringCounter(string longString, string subString)
+        {
+            var l = longString.ToCharArray();
+            var s = subString.ToCharArray();
+            var x = 0;
+            var result = 0;
+            for (int i = 0; i <= longString.Length - subString.Length; i++)
+            {
+                if(l[i] == s[x])
+                {
+                    x++;
+                    if(subString.Length >= x)
+                    {
+                        x = 0;
+                        result++;
+                    }
+                }
+            }
+            return result;
+        }                
     }
 }
