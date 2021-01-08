@@ -1,4 +1,5 @@
-﻿using Kata.Main.Tools;
+﻿using Kata.Main.Algorithms;
+using Kata.Main.Tools;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,7 +21,7 @@ namespace Kata.Main
             bool res = false;
             var stop = new Stopwatch();
             stop.Start();
-            var pow = NumberFormater("6");
+            var pow = MostFrequentDays.MostFrequentDaysCalculator(2021);
             stop.Stop();
             Console.WriteLine("elapsed ms: " + stop.ElapsedMilliseconds);
             Console.WriteLine($"Result: {pow}");
