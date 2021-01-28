@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Kata.Main.Algorithms
@@ -16,6 +17,19 @@ namespace Kata.Main.Algorithms
                 res[newPos] = arr[i];
             }
             return res;
+        }
+
+        static int[] rotLeft(int[] a, int d)
+        {
+            var r = new int[a.Length];
+            for (int x = 0; x < a.Length; x++)
+            {
+                var rot = x + d;
+                while (rot >= a.Length)
+                    rot -= a.Length;
+                r[x] = a[rot];
+            }
+            return r;
         }
 
         static int minimumBribes(int[] q)
@@ -50,6 +64,49 @@ namespace Kata.Main.Algorithms
 
             Console.WriteLine(bribes);
             return bribes;
+        }
+
+        static int jumpingOnClouds(int[] c)
+        {
+            var jumps = 0;
+            for (int i = 0; i < c.Length - 1; i++)
+            {
+                if (i + 2 >= c.Length)
+                    return ++jumps;
+
+                if (c[i + 2] != 1)
+                    i++;
+
+                jumps++;
+            }
+            return jumps;
+        }
+
+        public static int FindPairs(int n, int[] ar)
+        {
+            var sar = ar.OrderBy(a => a).ToArray();
+            var pairs = 0;
+            for (int i = 0; i < ar.Length; i++)
+            {
+                var lastIndex = Array.LastIndexOf(sar, sar[i]);
+                pairs += (lastIndex + 1 - i) / 2;
+                i = lastIndex;
+            }
+            return pairs;
+        }
+
+        public static int countingValleys(int steps, string path)
+        {
+            var valleys = 0;
+            var currentPos = 0;
+            var cPath = path.ToCharArray();
+            for (int i = 0; i < cPath.Length; i++)
+            {
+                if (currentPos == 0 && cPath[i] == 'D')
+                    valleys++;
+                currentPos += cPath[i] == 'D' ? -1 : 1;
+            }
+            return valleys;
         }
 
         public static int OneOddNumberOccurrence(int[] arr)

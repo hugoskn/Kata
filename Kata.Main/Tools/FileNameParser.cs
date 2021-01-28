@@ -13,11 +13,8 @@ namespace Kata.Main.Tools
                 if (f.Name.Contains(pattern))
                 {
                     File.Move(f.FullName, f.FullName.Replace(pattern, newName));
-                }
-                
+                }                
             }
-
         }
-
     }
 }
