@@ -18,6 +18,40 @@ namespace Kata.Main.Algorithms
             return res;
         }
 
+        static int minimumBribes(int[] q)
+        {
+            if (q.Length <= 1)
+                return 0;
+
+            var nums = new int[q.Length];
+            for (int i = 0; i < q.Length; i++)
+                nums[i] = i + 1;
+
+            var bribes = 0;
+            for (int i = 0; i < q.Length; i++)
+            {
+                if (nums[i] == q[i])
+                    continue;
+
+                if ((i + 1 >= q.Length || nums[i + 1] != q[i]) && (i + 2 > q.Length || nums[i + 2] != q[i]))
+                {
+                    Console.WriteLine("Too chaotic");
+                    return 0;
+                }
+                var swapPlaces = nums[i + 1] == q[i] ? 1 : 2;
+                for (int j = swapPlaces; j > 0; j--)
+                {
+                    var aux = nums[i + j];
+                    nums[i + j] = nums[i + j - 1];
+                    nums[i + j - 1] = aux;
+                }
+                bribes += swapPlaces;
+            }
+
+            Console.WriteLine(bribes);
+            return bribes;
+        }
+
         public static int OneOddNumberOccurrence(int[] arr)
         {
             var dict = new Dictionary<int, int>();

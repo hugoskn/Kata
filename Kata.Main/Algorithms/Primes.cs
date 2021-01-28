@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Kata.Main.Algorithms
+﻿namespace Kata.Main.Algorithms
 {
     public class Primes
     {
@@ -22,21 +18,18 @@ namespace Kata.Main.Algorithms
             return null;
         }
 
-        public static bool IsPrime(long number)
+        public static bool IsPrime(long n)
         {
-            if (number <= 1)
+            if (n <= 1)
                 return false;
-            else if (number % 2 == 0)
-                return number == 2;
-
-            long N = (long)(Math.Sqrt(number) + 0.5);
-
-            for (int i = 3; i <= N; i += 2)
-                if (number % i == 0)
+            var i = 2;
+            while (i * i <= n)
+            {
+                if (n % i++ == 0)
                     return false;
-
+            }
             return true;
         }
-        
+
     }
 }
