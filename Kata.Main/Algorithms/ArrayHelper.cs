@@ -32,6 +32,61 @@ namespace Kata.Main.Algorithms
             return r;
         }
 
+        public static int Peaks(int[] A)
+        {
+            var peaks = new List<int>();
+            for (int i = 0; i < A.Length; i++)
+            {
+                if ((i - 1 < 0 || A[i] >= A[i - 1]) &&
+                    (i + 1 > A.Length || A[i] > A[i + 1]))
+                    peaks.Add(i);
+            }
+
+            for (int i = 1; i < peaks.Count; i++)
+            {
+                if (peaks[i] - peaks[i - 1] < peaks.Count)
+                    peaks.RemoveAt(i--);
+            }
+            return peaks.Count;
+        }
+
+        static int minimumSwaps(int[] arr)
+        {
+            var swaps = 0;
+            for (int i = 0; i < arr.Length; i++)
+            {
+                if (arr[i] == i + 1)
+                    continue;
+
+                var index = Array.IndexOf(arr, i + 1);
+                var aux = arr[i];
+                arr[i] = arr[index];
+                arr[index] = aux;
+                swaps++;
+            }
+            return swaps;
+        }
+
+        private static int[] minimalReplaces(string[] s)
+        {
+            var result = new int[s.Length];
+            for (int i = 0; i < s.Length; i++)
+            {
+                var c = s[i].ToCharArray();
+                var replaces = 0;
+                for (int j = 0; j < c.Length - 1; j++)
+                {
+                    if (c[j] == c[j + 1])
+                    {
+                        replaces++;
+                        j++;
+                    }
+                }
+                result[i] = replaces;
+            }
+            return result;
+        }
+
         static int minimumBribes(int[] q)
         {
             if (q.Length <= 1)
