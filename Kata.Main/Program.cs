@@ -11,20 +11,86 @@ namespace Kata.Main
 {
     static class Program
     {
-
         static void Main(string[] args)
         {
             Console.WriteLine("Started! ");
             var stop = new Stopwatch();
-            stop.Start();            
+            stop.Start();
+            var result = FindMaxNUmberAfterRemoveFive(-5859);
+            //TextParser();
             //var pow = ConvertFileToStingOfBytes(@"C:\EtoroFiles\BytesStringTests\Elon Musk ( PDFDrive ).pdf");
             //File.WriteAllText(@"C:\EtoroFiles\BytesStringTests\hugeElonmuskpddBytes", pow);
-            var pdfBytes = ConvertFileToBytes(@"C:\EtoroFiles\BytesStringTests\Elon Musk ( PDFDrive ).pdf");
+            //var pdfBytes = ConvertFileToBytes(@"C:\EtoroFiles\BytesStringTests\Elon Musk ( PDFDrive ).pdf");
             //File.WriteAllBytes(@"C:\EtoroFiles\BytesStringTests\hugeElonmuskpddBytes.pdf", pdfBytes);
             stop.Stop();
             Console.WriteLine("elapsed ms: " + stop.ElapsedMilliseconds + ". Elapsed s: " + stop.ElapsedMilliseconds / 1000);
-            var expected = 6;
-            //Console.WriteLine($"Expected: {expected} Result: {pow}");
+            var expected = -589;
+            Console.WriteLine($"Expected: {expected} Result: {result}");
+        }
+
+        private static int FindMaxNUmberAfterRemoveFive(int number)
+        {
+            var maxResult = int.MinValue;
+            var posNeg = number < 0 ? -1 : 1;
+            var charsNumbers = number.ToString().ToList();
+            for (var i = 0; i < charsNumbers.Count; i++)
+            {
+                if (charsNumbers[i] != '5')
+                    continue;
+
+                charsNumbers.RemoveAt(i);
+                var wo5 = posNeg * int.Parse(new String(charsNumbers.ToArray()));
+                charsNumbers.Insert(i, '5');
+                maxResult = Math.Max(maxResult, wo5 * posNeg);
+            }
+            return maxResult == int.MinValue ? 0 : maxResult;
+        }
+
+        private static void TextParser()
+        {
+            Console.WriteLine("Text Parser. Reading file...");
+            var medicalYesNoQuestionText = "<MedicalHistoryYesNoQuestion";
+            var detailedQuestionText = "<MedicalDetailedQuestion";
+            var basicInputText = "<BasicInput";
+            var fileTextLines = File.ReadAllLines("C:\\Repos\\Sanapp\\Applications\\WebApp\\Sanapp\\Sanapp.Web\\ClientApp\\src\\components\\MedicalHistory\\MedicalHistory.js");
+            var result = new List<string>();
+            for (int i = 0; i < fileTextLines.Length; i++)
+            {
+                if (fileTextLines[i].Contains(medicalYesNoQuestionText) || fileTextLines[i].Contains(detailedQuestionText))
+                    result.Add(ParseMedicalQuestionLine(fileTextLines[i]));
+                else if (fileTextLines[i].Contains(basicInputText))
+                    result.Add(ParseBasicInputLine(fileTextLines[i], fileTextLines[i - 2]));
+            }
+            File.WriteAllLines("C:\\Users\\hugos\\Pictures\\Sanapp\\medicalHistoryQuestions.txt", result);
+        }
+
+        private static string ParseBasicInputLine(string propertyNameLine, string questionTextLine)
+        {
+            var fieldText = "basicVal={this.state.medicalHistory.";
+            var propertyName = ParseSubstringLine(propertyNameLine, fieldText, "}");
+
+            var questionValue = ParseSubstringLine(questionTextLine, ">", "<");
+
+            return $"public const string {propertyName.FirstCharToUpper()} = \"{questionValue}\";";
+        }
+
+        private static string ParseMedicalQuestionLine(string fileLine)
+        {
+            var fieldText = "field={'";
+            var labelText = "label='";
+            var propertyName = ParseSubstringLine(fileLine, fieldText, "'}");
+            var questionValue = ParseSubstringLine(fileLine, labelText, "'");
+            return $"public const string {propertyName.FirstCharToUpper()} = \"{questionValue}\";";
+        }
+
+        private static string ParseSubstringLine(string textLineToParse, string startText, string endText)
+        {
+            var startIndex = textLineToParse.IndexOf(startText);
+            if (startIndex == -1)
+                return null;
+            var endIndex = textLineToParse.Substring(startIndex + startText.Length).IndexOf(endText);
+            var textResult = textLineToParse.Substring(startIndex + startText.Length, endIndex);
+            return textResult;
         }
 
         private static string ConvertFileToStingOfBytes(string path)
@@ -52,11 +118,11 @@ namespace Kata.Main
             }
             value = value <= 3 ? 3 : value / 2;
             var seconds = value - 2;
-            
-            while(seconds < t)
+
+            while (seconds < t)
             {
                 seconds++;
-                if(--value == 0)
+                if (--value == 0)
                 {
                     value = 3 * mult++;
                 }
@@ -75,7 +141,7 @@ namespace Kata.Main
                 if (B[i] % 2 == 0)
                     continue;
                 loafs += 2;
-                B[i]++;                
+                B[i]++;
                 if (i == B.Count - 1)
                     return B[i] % 2 == 0 ? loafs.ToString() : "NO";
                 B[i + 1]++;
@@ -121,9 +187,9 @@ namespace Kata.Main
                 {
                     var prevIndex = nexttIndex;
                     nexttIndex = Array.IndexOf(a.ToList().GetRange(nexttIndex + 1, a.Length - nexttIndex - 1).ToArray(), a[i]);
-                    if(nexttIndex != -1)
+                    if (nexttIndex != -1)
                         minDist = Math.Min(minDist, nexttIndex - prevIndex);
-                }                
+                }
             }
             return minDist;
         }
@@ -136,9 +202,9 @@ namespace Kata.Main
             while (i < arr.Length)
             {
                 var nextIndex = Array.LastIndexOf(arr, arr[i]);
-                if (nextIndex > -1)                
+                if (nextIndex > -1)
                     mostRepeateadTimes = Math.Max(mostRepeateadTimes, nextIndex - i + 1);
-                
+
                 i++;
             }
             return arr.Length - mostRepeateadTimes;
