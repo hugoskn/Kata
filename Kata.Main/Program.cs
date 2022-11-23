@@ -16,16 +16,59 @@ namespace Kata.Main
             Console.WriteLine("Started! ");
             var stop = new Stopwatch();
             stop.Start();
-            var result = FindMaxNUmberAfterRemoveFive(-5859);
-            //TextParser();
+            //var result = FindMaxNUmberAfterRemoveFive(-5859);
+            CostCalculator();
             //var pow = ConvertFileToStingOfBytes(@"C:\EtoroFiles\BytesStringTests\Elon Musk ( PDFDrive ).pdf");
             //File.WriteAllText(@"C:\EtoroFiles\BytesStringTests\hugeElonmuskpddBytes", pow);
             //var pdfBytes = ConvertFileToBytes(@"C:\EtoroFiles\BytesStringTests\Elon Musk ( PDFDrive ).pdf");
             //File.WriteAllBytes(@"C:\EtoroFiles\BytesStringTests\hugeElonmuskpddBytes.pdf", pdfBytes);
             stop.Stop();
-            Console.WriteLine("elapsed ms: " + stop.ElapsedMilliseconds + ". Elapsed s: " + stop.ElapsedMilliseconds / 1000);
-            var expected = -589;
-            Console.WriteLine($"Expected: {expected} Result: {result}");
+            Console.WriteLine("\n elapsed ms: " + stop.ElapsedMilliseconds + ". Elapsed s: " + stop.ElapsedMilliseconds / 1000);
+            //var expected = -589;
+            //Console.WriteLine($"Expected: {expected} Result: ");
+        }
+
+        private class CostModel { public string MeterCategory { get; set; } public decimal Cost { get; set; } }
+
+        private static void CostCalculator()
+        {
+            Console.WriteLine("Type Company name to calculate cost:");
+            var companyName = Console.ReadLine();
+            var filePath = @"C:\Users\hugos\Downloads\prod costs - Reduced More.csv";
+            Console.WriteLine("Reading file in: " + filePath);
+            var fileTextLines = File.ReadAllLines(filePath);
+            if (fileTextLines?.Length <= 0)
+            {
+                Console.WriteLine("No data found");
+                return;
+            }
+            Console.WriteLine("Read file successfully");
+            Console.WriteLine("EXtracting values from rows containing " + companyName + " ...");
+            decimal totalCost = 0;
+            var result = new List<CostModel>();
+            for (int i = 0; i < fileTextLines.Length; i++)
+            {
+                if (!fileTextLines[i].Contains(companyName, StringComparison.InvariantCultureIgnoreCase))
+                    continue;
+                var lineTexts = fileTextLines[i].Split(",");
+                if (lineTexts.Length <= 0)
+                    continue;
+
+                var meterCategory = lineTexts[2];
+                var cost = Convert.ToDecimal(lineTexts[7]);
+                totalCost += cost;
+                result.Add(new CostModel { MeterCategory = meterCategory, Cost = cost });
+            }
+
+            Console.WriteLine("Finish extracting values! \n");
+            var groupedByMeter = result.GroupBy(r => r.MeterCategory);
+            foreach (var meter in groupedByMeter)
+                Console.WriteLine($"{meter.Key}, {meter.Sum(m => m.Cost)}");
+
+            Console.WriteLine("________________");
+            Console.WriteLine("TOTAL COST: " + totalCost);
+            File.WriteAllLines(filePath.Replace("More.csv", "More Result.csv"), result.Select(r => $"{r.MeterCategory}, {r.Cost}"));
+            File.WriteAllLines(filePath.Replace("More.csv", "More Result Grouped.csv"), groupedByMeter.Select(r => $"{r.Key}, {r.Sum(g => g.Cost)}"));
         }
 
         private static int FindMaxNUmberAfterRemoveFive(int number)
@@ -49,19 +92,21 @@ namespace Kata.Main
         private static void TextParser()
         {
             Console.WriteLine("Text Parser. Reading file...");
-            var medicalYesNoQuestionText = "<MedicalHistoryYesNoQuestion";
-            var detailedQuestionText = "<MedicalDetailedQuestion";
-            var basicInputText = "<BasicInput";
-            var fileTextLines = File.ReadAllLines("C:\\Repos\\Sanapp\\Applications\\WebApp\\Sanapp\\Sanapp.Web\\ClientApp\\src\\components\\MedicalHistory\\MedicalHistory.js");
+            var fileTextLines = File.ReadAllLines(@"C:/Shared/TodaysPicks-StockTradingHackers.txt");
+            var startIndexText = "ticker: \"";
+            var endIndexText = "\", exchange";
             var result = new List<string>();
             for (int i = 0; i < fileTextLines.Length; i++)
             {
-                if (fileTextLines[i].Contains(medicalYesNoQuestionText) || fileTextLines[i].Contains(detailedQuestionText))
-                    result.Add(ParseMedicalQuestionLine(fileTextLines[i]));
-                else if (fileTextLines[i].Contains(basicInputText))
-                    result.Add(ParseBasicInputLine(fileTextLines[i], fileTextLines[i - 2]));
+                if (!fileTextLines[i].Contains(startIndexText))
+                    continue;
+
+                var startIndex = fileTextLines[i].IndexOf(startIndexText) + startIndexText.Length;
+                var endIndex = fileTextLines[i].IndexOf(endIndexText);
+                var stringResult = fileTextLines[i].Substring(startIndex, endIndex - startIndex);
+                result.Add(stringResult);
             }
-            File.WriteAllLines("C:\\Users\\hugos\\Pictures\\Sanapp\\medicalHistoryQuestions.txt", result);
+            File.WriteAllLines(@"C:/Shared/TodaysPicks-StockTradingHackers-Results.txt", result);
         }
 
         private static string ParseBasicInputLine(string propertyNameLine, string questionTextLine)
