@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -17,7 +18,9 @@ namespace Kata.Main
             var stop = new Stopwatch();
             stop.Start();
             //var result = FindMaxNUmberAfterRemoveFive(-5859);
-            CostCalculator();
+            //DisticntsOrders();
+            JiraExtractor();
+            //BettingCalculator.CalcualteOptimalBetAmounts();
             //var pow = ConvertFileToStingOfBytes(@"C:\EtoroFiles\BytesStringTests\Elon Musk ( PDFDrive ).pdf");
             //File.WriteAllText(@"C:\EtoroFiles\BytesStringTests\hugeElonmuskpddBytes", pow);
             //var pdfBytes = ConvertFileToBytes(@"C:\EtoroFiles\BytesStringTests\Elon Musk ( PDFDrive ).pdf");
@@ -25,7 +28,128 @@ namespace Kata.Main
             stop.Stop();
             Console.WriteLine("\n elapsed ms: " + stop.ElapsedMilliseconds + ". Elapsed s: " + stop.ElapsedMilliseconds / 1000);
             //var expected = -589;
-            //Console.WriteLine($"Expected: {expected} Result: ");
+            //Console.WriteLine($"Expected: leetcode Result");
+            Console.ReadLine();
+        }
+
+        private static void DisticntsOrders()
+        {
+            var fileName = "PO split orders.txt";
+            var filePath = @"C:\Users\hugos\Downloads\";
+            Console.WriteLine("Reading file in: " + filePath + fileName);
+            var fileTextLines = File.ReadAllLines(filePath + fileName);
+            var result = fileTextLines.Select(f => f.Split("|", StringSplitOptions.RemoveEmptyEntries)[1].Trim() + ", " + f.Split("|", StringSplitOptions.RemoveEmptyEntries)[2].Trim());
+            var dist = result.Distinct().ToList();
+            File.WriteAllLines(filePath + "PO split orders result.txt", dist);
+        }
+
+        private static void JiraExtractor()
+        {
+            Console.WriteLine("Type Jira prefix (i.e. VCORE-, VSOP-):");
+            var jiraPrefixesCsv = Console.ReadLine();
+            var jiraPrefixes = new List<string> { "VCORE-", "VSOP-" };
+            if (!string.IsNullOrWhiteSpace(jiraPrefixesCsv))
+            {
+                var splittedPrefixes = jiraPrefixesCsv.Split(',');
+                foreach (var prefix in splittedPrefixes)
+                {
+                    if (!jiraPrefixes.Contains(prefix, StringComparer.InvariantCultureIgnoreCase))
+                        jiraPrefixes.Add(prefix.ToUpper());
+                }
+            }
+
+            var fileName = "Jira numbers github.txt";
+            var filePath = @"C:\Users\hugos\Desktop\Varis Scripts\" + fileName;
+            Console.WriteLine("Reading file in: " + filePath);
+            var fileTextLines = File.ReadAllLines(filePath);
+            if (fileTextLines?.Length <= 0)
+            {
+                Console.WriteLine("No data found");
+                return;
+            }
+            Console.WriteLine("Read file successfully");
+            Console.WriteLine("EXtracting values from rows containing " + jiraPrefixes.Aggregate((x, y) => x + ", " + y) + " ...");
+
+            var result = new List<string>();
+            for (int i = 0; i < fileTextLines.Length; i++)
+            {
+                foreach (var jiraPrefix in jiraPrefixes)
+                {
+                    if (fileTextLines[i].Contains(jiraPrefix, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        var indexOfPrefix = fileTextLines[i].IndexOf(jiraPrefix, StringComparison.InvariantCultureIgnoreCase);
+                        var lastIndexOfNumber = jiraPrefix.Length;
+                        while (lastIndexOfNumber < fileTextLines[i].Length && char.IsDigit(fileTextLines[i][lastIndexOfNumber]))
+                            lastIndexOfNumber++;
+
+                        var jiraNumber = fileTextLines[i].Substring(indexOfPrefix, lastIndexOfNumber);
+                        result.Add(jiraNumber);
+                        break;
+                    }
+                }                
+            }
+
+            Console.WriteLine("Finish extracting values! \n");
+            var distinctOrderedResults = result.Distinct().OrderBy(s => s);
+            foreach (var distinctJiraResult in distinctOrderedResults)
+                Console.WriteLine(distinctJiraResult);
+            
+            File.WriteAllLines(filePath.Replace(fileName, "Jira numbers github Result.txt"), distinctOrderedResults);
+        }
+
+        public static string ExerciseChris(string valueString)
+        {
+            var result = ExerciseChris("(ed(et(oc))el)");
+            Console.WriteLine($"Expected: leetcode Result: {result}");
+            var result2 = ExerciseChris("(u(love)i)");
+            Console.WriteLine($"Expected: iloveu Result: {result2}");
+            var result3 = ExerciseChris("(abcd)");
+            var value = valueString.ToCharArray().ToList();
+            while (value.Contains('('))
+            {
+                var lastOpenPar = value.LastIndexOf('(');
+                var firstClosePar = value.IndexOf(')');
+                if (lastOpenPar == -1 || firstClosePar == -1)
+                    break;
+                for (int j = 0; j < (firstClosePar - lastOpenPar) / 2; j++)
+                {
+                    var aux = value[lastOpenPar + j + 1];
+                    value[lastOpenPar + j + 1] = value[firstClosePar - 1 - j];
+                    value[firstClosePar - 1 - j] = aux;
+                }
+                value.RemoveAt(lastOpenPar);
+                value.RemoveAt(firstClosePar - 1);
+            }
+
+            return new string(value.ToArray());
+        }
+
+        public static string ExerciseChrisBruteForce(string value)
+        {
+            var lastIndexParenthesis = -1;
+            var valueChars = value.ToList();
+            var initialCharsCount = value.Length;
+            for (int i = 0; i < initialCharsCount; i++)
+            {
+                if (value[i] == '(')
+                {
+                    lastIndexParenthesis = i;
+                    continue;
+                }
+                if (value[i] == ')')
+                {
+                    var substring = value.Substring(lastIndexParenthesis + 1, i - lastIndexParenthesis - 1).Reverse();
+                    for (int j = 0; j < substring.Count(); j++)
+                    {
+                        value = value.Insert(lastIndexParenthesis + 1 + j, substring.ElementAt(j).ToString());
+                    }
+                    value = value.Remove(i, substring.Count() + 1);
+                    value = value.Remove(lastIndexParenthesis, 1);
+                    i = -1;
+                    initialCharsCount = value.Length;
+                }
+            }
+            return value;
         }
 
         private class CostModel { public string MeterCategory { get; set; } public decimal Cost { get; set; } }
