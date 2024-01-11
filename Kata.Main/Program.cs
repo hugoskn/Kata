@@ -1,7 +1,10 @@
-﻿using Kata.Main.Algorithms;
+﻿using Accord.MachineLearning.DecisionTrees;
+using Kata.MachineLearning;
+using Kata.Main.Algorithms;
 using Kata.Main.Tools;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.IO;
@@ -20,10 +23,26 @@ namespace Kata.Main
             Console.WriteLine("Started! ");
             var stop = new Stopwatch();
             stop.Start();
+            await MelateService.FindOcurrencesOfTickets();
+            //BasicNeuralNetworkService.RunNeuralNetworkLotteryNumbers();
+            //var values = File.ReadAllLines(@"C:\Shared\arrayManip.txt");
+            //Console.WriteLine(ArrayHelper.arrayManipulation(10, new List<List<int>> { new(){ 1, 5, 3 }, new() { 4, 8, 7 }, new() { 6, 9, 1 } }));
+            //var valuesinputs = values.Select(s => s.Split(" ").Select(s => Convert.ToInt32(s)).ToImmutableArray()).ToImmutableArray();
+            //var startN = valuesinputs[0][0];
+
+            //var allLines = File.ReadAllLines(@"C:\Shared\AppsForFun\Melate predictor\Melate Results.csv");
+            //var dataValues = allLines.Select(l => l.Split(',').Select(s => Convert.ToInt32(s)).ToArray()).ToArray();
+
+            //var (permutedInputs, permutedOutputs) = RandomForestKataHelper.PermutToGenerateOutputs(dataValues);
+            //var forestPredictor = RandomForestKataHelper.TrainRandomForest(permutedInputs, permutedOutputs, 100);
+            //PermutFrom1to56AndPredict(forestPredictor);
+            //valuesinputs.RemoveAt(0);
+            //Console.WriteLine("\n elapsed ms: " + stop.ElapsedMilliseconds + ". Elapsed s: " + stop.ElapsedMilliseconds / 1000);
+            //Console.WriteLine(ArrayHelper.arrayManipulation(startN, valuesinputs));
             //var result = FindMaxNUmberAfterRemoveFive(-5859);
             //DisticntsOrders();
             //TextFilesParser.JiraExtractor();
-            await TextFilesParser.TransformToTextMarketplacesJsonVaris();
+            //await TextFilesParser.TransformToTextMarketplacesJsonVaris();
             //BettingCalculator.CalcualteOptimalBetAmounts();
             //var pow = ConvertFileToStingOfBytes(@"C:\EtoroFiles\BytesStringTests\Elon Musk ( PDFDrive ).pdf");
             //File.WriteAllText(@"C:\EtoroFiles\BytesStringTests\hugeElonmuskpddBytes", pow);
@@ -34,6 +53,61 @@ namespace Kata.Main
             //var expected = -589;
             //Console.WriteLine($"Expected: leetcode Result");
             Console.ReadLine();
+        }
+
+        public static void PermutFrom1to56AndPredict(RandomForest forest)
+        {
+            int[] numbers = new int[56];
+            var predictionsResults = new int[57];
+
+            for (int i = 0; i < 56; i++)
+            {
+                numbers[i] = i + 1;
+            }
+
+
+            List<int[]> combinations = Permutator.GenerateCombinations(numbers, 5);
+
+            // Print or process the combinations as needed
+            Console.WriteLine($"Predicting combinations: {combinations.Count} ...");
+            for (int i = 0;i < combinations.Count;i++)
+            {
+                predictionsResults[forest.Decide(combinations[i])]++;
+                //Console.WriteLine($"Comb: {string.Join(", ", combination)} - Prediction: {prediction}");                
+            }
+            Console.WriteLine($"Finish predicting combinations: {combinations.Count}!");
+            File.WriteAllText(@"C:\Shared\AppsForFun\Melate predictor\Melate Predictions.json", JsonSerializer.Serialize(predictionsResults));
+            var predictionsResultsString = "";
+            for (int i = 0; i < predictionsResults.Length; i++)
+                predictionsResultsString += i + "," + predictionsResults[i] + "\n";
+            File.WriteAllText(@"C:\Shared\AppsForFun\Melate predictor\Melate Predictions.txt", predictionsResultsString);
+        }
+
+        public static void PrintSpiral(List<List<int>> values)
+        {
+            var startIndex = 0;
+            var leftRightStart = 0;
+            var leftRightEnd = values[0].Count;
+            var topBottomEnd = values.Count;
+            var rightLeft = 0;
+            var bottomTop = 1;
+            var i = 0;
+            var j = 0;
+
+            for (startIndex = 0; startIndex < topBottomEnd; startIndex++)
+            {
+                for (i = leftRightStart; i < leftRightEnd; i++)
+                    Console.WriteLine(values[startIndex][i]);
+                
+                leftRightStart++;
+                leftRightEnd--;
+                for (j = startIndex + 1; j < topBottomEnd; j++)
+                    Console.WriteLine(values[j][i]);
+
+                for (int k = j; k < j; k++)
+                    Console.WriteLine(values[j][i]);
+
+            }
         }
 
         public static string ExerciseChris(string valueString)

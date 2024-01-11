@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Kata.Main.Algorithms
@@ -50,7 +51,7 @@ namespace Kata.Main.Algorithms
             return peaks.Count;
         }
 
-        static int minimumSwaps(int[] arr)
+        public static int minimumSwaps(int[] arr)
         {
             var swaps = 0;
             for (int i = 0; i < arr.Length; i++)
@@ -65,6 +66,23 @@ namespace Kata.Main.Algorithms
                 swaps++;
             }
             return swaps;
+        }
+
+        public static long arrayManipulation(int n, ImmutableArray<ImmutableArray<int>> queries)
+        {
+            var arrayOps = new long[n];
+            var arrayOpsMax = long.MinValue;
+
+            for (int i = 1; i < queries.Length; i++)
+            {
+                for (int j = queries[i][0] - 1; j < queries[i][1]; j++)
+                {
+                    arrayOps[j] += queries[i][2];
+                    arrayOpsMax = Math.Max(arrayOpsMax, arrayOps[j]);
+                }
+            }
+
+            return arrayOpsMax;
         }
 
         private static int[] minimalReplaces(string[] s)

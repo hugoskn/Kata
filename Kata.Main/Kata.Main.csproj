@@ -2,8 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kata.MachineLearning\Kata.MachineLearning.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="TestFiles\ShortestSubArraySumData.json">
