@@ -15,37 +15,39 @@ namespace Kata.Main.Algorithms
             var melateResultsStrings = await File.ReadAllLinesAsync("C:\\EtoroFiles\\Melate.csv");
             var melateResultsSplitted = melateResultsStrings.Select(s => s.Split(",", StringSplitOptions.TrimEntries));
             var melateResults = melateResultsSplitted.Select(s => new[]
-            { Convert.ToInt32(s[2]),Convert.ToInt32(s[3]), Convert.ToInt32(s[4]), Convert.ToInt32(s[5]), Convert.ToInt32(s[6]), Convert.ToInt32(s[7]) });
+            { Convert.ToInt32(s[2]),Convert.ToInt32(s[3]), Convert.ToInt32(s[4]), Convert.ToInt32(s[5]), Convert.ToInt32(s[6]), Convert.ToInt32(s[7]) }).ToImmutableArray();
 
-            var tickets = new int[][]
+            Console.WriteLine("Reading/generating combinations...");
+            var combs = await File.ReadAllLinesAsync("C:\\EtoroFiles\\Melate1To56Combinations.txt");
+            var tickets = combs.Select(c => c.Split("-").Select(s => Convert.ToInt32(s)).ToArray()).ToImmutableArray();
+            Console.WriteLine("Done reading/generating combinations: " + tickets.Length);
+            //var tickets = GenerateUniqueCombinations().ToImmutableArray();
+            //await File.WriteAllLinesAsync("C:\\EtoroFiles\\Melate1To56Combinations.txt", tickets.Select(JoinWithDash));
+            var melateResultsCount = melateResults.Length;
+            var results = new List<string> { $"TicketTrial, R0, R1, R2, R3, R4, R5, R6" };
+            for (int i = 19020196; i < tickets.Length; i++)
             {
-                [1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 7, 8], [1, 2, 5, 6, 7, 8],
-                [9, 10, 11, 12, 13, 14], [9, 10, 11, 15, 16, 17], [12, 13, 14, 15, 16, 17],
-                [18, 19, 20, 21, 26, 27], [18, 19, 22, 23, 30, 31], [18, 19, 24, 25, 28, 29], [20, 21, 22, 23, 28, 29], [20, 21, 24, 25, 30, 31], [22, 23, 24, 25, 26, 27], [26, 27, 28, 29, 30, 31],
-                [32, 33, 34, 35, 40, 41], [32, 33, 36, 37, 44, 45], [32, 33, 38, 39, 42, 43], [34, 35, 36, 37, 42, 43], [34, 35, 38, 39, 44, 45], [36, 37, 38, 39, 40, 41], [40, 41, 42, 43, 44, 45],
-                [46, 47, 48, 49, 54, 55], [46, 47, 50, 51, 55, 56], [46, 47, 52, 53, 54, 55], [48, 49, 50, 51, 52, 53], [48, 49, 52, 53, 55, 56], [49, 50, 51, 52, 53, 54], [51, 52, 53, 54, 55, 56]
-            };
-
-            //var ticketStrings = tickets.Select(JoinWithDash).ToImmutableArray();
-            var melateResultsCount = melateResults.Count();
-            var results = new MelateResultsModel { MelateIntersectedResults = new List<MelateIntersectedResultModel>() };
-            for (int i = 0; i < melateResultsCount; i++)
-            {
-                var melateResult = melateResults.ElementAt(i);
-                Console.Write($"{JoinWithDash(melateResult)} - ");
+                //Console.Write($"{JoinWithDash(tickets[i])} - ");
                 var intersections = new int[7];
-                for (var j = 0; j < tickets.Length; j++)
+                for (var j = 0; j < melateResults.Length; j++)
                 {
-                    var intersectedCount = tickets[j].Intersect(melateResult).Count();
+                    var intersectedCount = tickets[i].Intersect(melateResults[j]).Count();
                     intersections[intersectedCount]++;
                     //var result = new MelateIntersectedResultModel { TicketValidated = ticketString, ResultCompared = JoinWithDash(melateResults.ElementAt(i)), IntersectedCount = intersectedCount };
                     //results.MelateIntersectedResults.Add(result);
                     //results.IntersectionNCount[intersectedCount]++;
                 }
-                Console.Write($"I0:{intersections[0]} - I1:{intersections[1]} - I2:{intersections[2]} - I3:{intersections[3]}" +
-                    $" - I4:{intersections[4]} - I5:{intersections[5]} - I6:{intersections[6]} \n");
+                results.Add($"{JoinWithDash(tickets[i])}, {intersections[0]}, {intersections[1]}, {intersections[2]}, {intersections[3]}, {intersections[4]}, {intersections[5]}, {intersections[6]}");
+
+                if (i % 1000000 == 0)
+                {
+                    Console.WriteLine("1M Records= " + i / 1000000);
+                    await File.WriteAllLinesAsync("C:\\EtoroFiles\\MelateIntersectionsWithAllCombinations-part1.xlsx", results);
+                }
+                //Console.Write($"I0:{intersections[0]} - I1:{intersections[1]} - I2:{intersections[2]} - I3:{intersections[3]}" +
+                //  $" - I4:{intersections[4]} - I5:{intersections[5]} - I6:{intersections[6]} \n");
             }
-            await File.WriteAllTextAsync("C:\\EtoroFiles\\MelateIntersections.json", JsonSerializer.Serialize(results));
+            await File.WriteAllLinesAsync("C:\\EtoroFiles\\MelateIntersectionsWithAllCombinations.csv", results);
         }
 
         public static async Task FindTuplesIntersections()
