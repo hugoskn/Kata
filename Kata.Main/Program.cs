@@ -20,6 +20,11 @@ namespace Kata.Main
     {
         static async Task Main(string[] args)
         {
+            var layers = new int[] { new int {  }, 2, 3, 4, 5 };
+            var words = new[] { "hello", "world", "in", "a", "frame" };
+
+
+
             Console.WriteLine("Started! ");
             var stop = new Stopwatch();
             stop.Start();
